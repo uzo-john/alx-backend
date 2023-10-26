@@ -1,32 +1,42 @@
-#!/usr/bin/env python3
-"""First-In First-Out caching module.
-"""
-from collections import OrderedDict
-
+#!/usr/bin/python3
+""" FIFO caching """
 from base_caching import BaseCaching
 
 
 class FIFOCache(BaseCaching):
-    """Represents an object that allows storing and
-    retrieving items from a dictionary with a FIFO.
-    """
+    """ Class that inherits from BaseCaching and is a caching system """
     def __init__(self):
-        """Initializes the cache.
-        """
         super().__init__()
-        self.cache_data = OrderedDict()
+        self.data = {}
+        self.next_in, self.next_out = 0, 0
+
+    def _pop(self):
+        """ FIFO algorithm, remove element """
+        self.next_out += 1
+        key = self.data[self.next_out]
+        del self.data[self.next_out], self.cache_data[key]
+
+    def _push(self, key, item):
+        """ FIFO algorithm, add element """
+        if len(self.cache_data) > BaseCaching.MAX_ITEMS - 1:
+            print("DISCARD: {}".format(self.data[self.next_out + 1]))
+            self._pop()
+        self.cache_data[key] = item
+        self.next_in += 1
+        self.data[self.next_in] = key
 
     def put(self, key, item):
-        """Adds an item in the cache.
-        """
-        if key is None or item is None:
-            return
-        self.cache_data[key] = item
-        if len(self.cache_data) > BaseCaching.MAX_ITEMS:
-            first_key, _ = self.cache_data.popitem(False)
-            print("DISCARD:", first_key)
+        """ Assign to the dictionary """
+        if key and item:
+            if key in self.cache_data:
+                self.cache_data[key] = item
+            else:
+                self._push(key, item)
 
     def get(self, key):
-        """Retrieves an item by key.
-        """
-        return self.cache_data.get(key, None)ok
+        """ Return the value linked """
+        if key is None or self.cache_data.get(key) is None:
+            return None
+        if key in self.cache_data:
+            value = self.cache_data[key]
+            return value
